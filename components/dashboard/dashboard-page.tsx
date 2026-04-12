@@ -14,8 +14,10 @@ import {
   Sparkles,
   ArrowRight,
   Loader2,
-  Crown
+  Crown,
+  Coins
 } from "lucide-react"
+import Link from "next/link"
 
 type DashboardView = "home" | "form" | "editor"
 
@@ -32,7 +34,7 @@ interface Guion {
 
 interface GuionesMeta {
   count: number
-  limit: number
+  creditos: number
   es_premium: boolean
   can_create: boolean
 }
@@ -69,7 +71,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
   const [guiones, setGuiones] = useState<Guion[]>([])
   const [meta, setMeta] = useState<GuionesMeta>({
     count: 0,
-    limit: 5,
+    creditos: 5,
     es_premium: false,
     can_create: true
   })
@@ -176,12 +178,12 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 {[
                   { 
-                    label: meta.es_premium ? "Guiones (Ilimitados)" : `Guiones (${meta.count}/${meta.limit})`, 
-                    value: totalGuiones.toString(), 
-                    icon: FileText 
+                    label: "Créditos disponibles", 
+                    value: meta.creditos.toString(), 
+                    icon: Coins 
                   },
+                  { label: "Guiones creados", value: totalGuiones.toString(), icon: FileText },
                   { label: "Este mes", value: thisMonthGuiones.toString(), icon: TrendingUp },
-                  { label: "Tiempo ahorrado", value: `${estimatedTimeSaved}h`, icon: Clock },
                   { label: "Total palabras", value: totalWords.toLocaleString(), icon: Sparkles },
                 ].map((stat, i) => (
                   <Card key={i} className={`bg-card border-border opacity-0 animate-fade-in-up transition-all duration-300 hover:translate-y-[-4px] hover:shadow-lg hover:shadow-primary/10 hover:border-primary/30 ${
@@ -205,25 +207,27 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                 ))}
               </div>
 
-              {/* Quick action or Premium upgrade */}
-              {!meta.can_create && !meta.es_premium ? (
+              {/* Quick action or Buy credits */}
+              {!meta.can_create ? (
                 <Card className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-500/30 mb-8 opacity-0 animate-fade-in-up animation-delay-500 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/20">
                   <CardContent className="p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <Crown className="w-5 h-5 text-amber-500" />
-                        <h3 className="font-semibold text-lg">Has alcanzado el límite gratuito</h3>
+                        <Coins className="w-5 h-5 text-amber-500" />
+                        <h3 className="font-semibold text-lg">Te quedaste sin créditos</h3>
                       </div>
                       <p className="text-muted-foreground text-sm">
-                        Has creado {meta.count} de {meta.limit} guiones. Pasa a Premium para crear guiones ilimitados.
+                        Compra más créditos para seguir creando guiones virales con IA.
                       </p>
                     </div>
-                    <Button 
-                      className="gap-2 whitespace-nowrap bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                    >
-                      <Crown className="w-4 h-4" />
-                      Pasar a Premium
-                    </Button>
+                    <Link href="/pricing">
+                      <Button 
+                        className="gap-2 whitespace-nowrap bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                      >
+                        <Coins className="w-4 h-4" />
+                        Comprar créditos
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
               ) : (
@@ -232,10 +236,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                     <div>
                       <h3 className="font-semibold text-lg mb-1">Crea tu próximo viral</h3>
                       <p className="text-muted-foreground text-sm">
-                        {meta.es_premium 
-                          ? "Como usuario Premium, tienes guiones ilimitados. Usa IA para generar contenido viral."
-                          : `Tienes ${meta.limit - meta.count} guiones disponibles. Usa IA para generar contenido que retiene audiencia.`
-                        }
+                        Tienes {meta.creditos} créditos disponibles. Usa IA para generar contenido que retiene audiencia.
                       </p>
                     </div>
                     <Button onClick={handleNewScript} className="gap-2 whitespace-nowrap transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25">
@@ -269,10 +270,12 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                           Crear primer guion
                         </Button>
                       ) : (
-                        <Button className="gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
-                          <Crown className="w-4 h-4" />
-                          Pasar a Premium
-                        </Button>
+                        <Link href="/pricing">
+                          <Button className="gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                            <Coins className="w-4 h-4" />
+                            Comprar créditos
+                          </Button>
+                        </Link>
                       )}
                     </div>
                   ) : (

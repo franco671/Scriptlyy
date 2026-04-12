@@ -4,6 +4,9 @@ import { useState } from "react"
 import { Navbar } from "./navbar"
 import { Hero } from "./hero"
 import { HowItWorks } from "./how-it-works"
+import { StatsSection } from "./stats-section"
+import { PricingSection } from "./pricing-section"
+import { FAQSection } from "./faq-section"
 import { AuthModal } from "./auth-modal"
 
 interface LandingPageProps {

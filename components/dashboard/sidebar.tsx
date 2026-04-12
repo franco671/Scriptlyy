@@ -14,8 +14,9 @@ import {
   Menu,
   X,
   Loader2,
-  Crown
+  Coins
 } from "lucide-react"
+import Link from "next/link"
 import { cn } from "@/lib/utils"
 
 interface Guion {
@@ -30,7 +31,7 @@ interface Guion {
 
 interface GuionesMeta {
   count: number
-  limit: number
+  creditos: number
   es_premium: boolean
   can_create: boolean
 }
@@ -56,7 +57,7 @@ export function DashboardSidebar({
   const [guiones, setGuiones] = useState<Guion[]>([])
   const [meta, setMeta] = useState<GuionesMeta>({
     count: 0,
-    limit: 5,
+    creditos: 5,
     es_premium: false,
     can_create: true
   })
@@ -116,18 +117,18 @@ export function DashboardSidebar({
             Nuevo Guion
           </Button>
         ) : (
-          <Button
-            className="w-full gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
-          >
-            <Crown className="w-4 h-4" />
-            Pasar a Premium
-          </Button>
+          <Link href="/pricing">
+            <Button
+              className="w-full gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+            >
+              <Coins className="w-4 h-4" />
+              Comprar créditos
+            </Button>
+          </Link>
         )}
-        {!meta.es_premium && (
-          <p className="text-xs text-muted-foreground text-center mt-2">
-            {meta.count}/{meta.limit} guiones usados
-          </p>
-        )}
+        <p className="text-xs text-muted-foreground text-center mt-2">
+          {meta.creditos} créditos disponibles
+        </p>
       </div>
 
       <ScrollArea className="flex-1 px-2">

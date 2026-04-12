@@ -1,8 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 
-const FREE_LIMIT = 5
-
 export async function GET() {
   try {
     const supabase = await createClient()
@@ -22,22 +20,23 @@ export async function GET() {
       throw error
     }
 
-    // Get premium status from profiles
+    // Get credits and premium status from profiles
     const { data: profile } = await supabase
       .from("profiles")
-      .select("es_premium")
+      .select("es_premium, creditos")
       .eq("id", user.id)
       .single()
 
     const esPremium = profile?.es_premium ?? false
+    const creditos = profile?.creditos ?? 0
     const count = guiones?.length ?? 0
-    const canCreate = esPremium || count < FREE_LIMIT
+    const canCreate = creditos > 0
 
     return NextResponse.json({
       guiones,
       meta: {
         count,
-        limit: FREE_LIMIT,
+        creditos,
         es_premium: esPremium,
         can_create: canCreate
       }
@@ -60,27 +59,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 })
     }
 
-    // Check premium status and current count
+    // Check credits
     const { data: profile } = await supabase
       .from("profiles")
-      .select("es_premium")
+      .select("creditos")
       .eq("id", user.id)
       .single()
 
-    const esPremium = profile?.es_premium ?? false
+    const creditos = profile?.creditos ?? 0
 
-    if (!esPremium) {
-      const { count } = await supabase
-        .from("guiones")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id)
-
-      if ((count ?? 0) >= FREE_LIMIT) {
-        return NextResponse.json(
-          { error: "Has alcanzado el límite de guiones gratuitos. Actualiza a Premium para continuar." },
-          { status: 403 }
-        )
-      }
+    if (creditos <= 0) {
+      return NextResponse.json(
+        { error: "No tienes créditos disponibles. Compra más créditos para continuar." },
+        { status: 403 }
+      )
     }
 
     const { titulo, nicho, hook, desarrollo, cta, segundos, visual_suggestion } = await request.json()
@@ -104,7 +96,20 @@ export async function POST(request: Request) {
       throw error
     }
 
-    return NextResponse.json(data)
+    // Deduct one credit
+    const { error: creditError } = await supabase
+      .from("profiles")
+      .update({ creditos: creditos - 1 })
+      .eq("id", user.id)
+
+    if (creditError) {
+      console.error("Error deducting credit:", creditError)
+    }
+
+    return NextResponse.json({
+      ...data,
+      creditos_restantes: creditos - 1
+    })
   } catch (error) {
     console.error("Error saving guion:", error)
     return NextResponse.json(
