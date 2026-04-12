@@ -1,14 +1,9 @@
-export const dynamic = "force-dynamic";
+"use client"
 
-import { ArrowLeft } from "lucide-react"
+import { Suspense } from "react"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
-import nextDynamic from 'next/dynamic'
-
-// Cargamos el componente sin SSR para evitar el error de Stripe
-const PricingCards = nextDynamic(
-  () => import('@/components/PricingCards').then((mod) => mod.PricingCards),
-  { ssr: false }
-)
+import { PricingCards } from "@/components/PricingCards"
 
 export default function PricingPage() {
   return (
@@ -24,9 +19,15 @@ export default function PricingPage() {
           <p className="text-muted-foreground text-lg">Elegí el plan para potenciar tu contenido.</p>
         </div>
 
-        <div className="flex justify-center">
+        {/* El secreto es que PricingCards (que usa useSearchParams) esté SIEMPRE bajo un Suspense */}
+        <Suspense fallback={
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="animate-spin w-10 h-10 text-primary mb-4" />
+            <p className="text-muted-foreground">Cargando planes...</p>
+          </div>
+        }>
           <PricingCards />
-        </div>
+        </Suspense>
       </div>
     </div>
   )
