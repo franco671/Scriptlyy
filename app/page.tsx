@@ -55,7 +55,7 @@ export default function HomePage() {
       <footer className="py-12 border-t text-center text-muted-foreground">
         <div className="container mx-auto px-4">
           <p className="mb-2 font-semibold text-foreground">Scriptlyy</p>
-          <p>© 2026 - Potenciando el canal de Franquito y creadores de todo el mundo.</p>
+          <p>© 2026 -Scriptlyy v2 - franco
         </div>
       </footer>
     </div>
