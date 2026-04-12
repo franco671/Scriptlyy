@@ -1,6 +1,8 @@
 "use client"
 
+// Esta línea le dice a Next.js: "No intentes pre-renderizar esto, hacelo en vivo"
 export const dynamic = "force-dynamic";
+
 import { useState, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,7 +12,6 @@ import { Check, Loader2, Sparkles, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 
-// 1. Creamos un componente interno que maneja los parámetros de búsqueda
 function PricingContent() {
   const [loadingId, setLoadingId] = useState<string | null>(null)
   const searchParams = useSearchParams()
@@ -47,7 +48,7 @@ function PricingContent() {
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">Comprar Créditos</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Cada crédito te permite generar un guion viral con IA. Elige el paquete que mejor se adapte a tus necesidades.
+          Cada pack de 50 guiones te permite generar contenido nuevo sin límites de tiempo.
         </p>
       </div>
 
@@ -71,7 +72,7 @@ function PricingContent() {
             </CardHeader>
             <CardContent className="flex-1 text-center">
               <div className="mb-6">
-                <span className="text-5xl font-bold">${(product.priceInCents / 100).toFixed(2)}</span>
+                <span className="text-5xl font-bold">${(product.priceInCents / 100).toFixed(0)}</span>
                 <span className="text-muted-foreground ml-1">USD</span>
               </div>
               <div className="space-y-3 text-left">
@@ -81,15 +82,11 @@ function PricingContent() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-5 h-5 text-primary" />
-                  <span>Guiones con IA avanzada</span>
+                  <span>IA para guiones virales</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-5 h-5 text-primary" />
-                  <span>Sugerencias visuales</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-primary" />
-                  <span>Sin caducidad</span>
+                  <span>Sugerencias de edición</span>
                 </div>
               </div>
             </CardContent>
@@ -104,7 +101,7 @@ function PricingContent() {
                 {loadingId === product.id ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Procesando...
+                    Cargando...
                   </>
                 ) : (
                   "Comprar ahora"
@@ -114,15 +111,10 @@ function PricingContent() {
           </Card>
         ))}
       </div>
-
-      <div className="mt-16 text-center text-muted-foreground">
-        <p>Pago seguro procesado por Stripe. Los créditos se agregan instantáneamente a tu cuenta.</p>
-      </div>
     </div>
   )
 }
 
-// 2. La página principal envuelve todo en Suspense
 export default function PricingPage() {
   return (
     <div className="min-h-screen bg-background">
