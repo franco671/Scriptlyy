@@ -42,22 +42,26 @@ export function HowItWorks() {
           {steps.map((step, index) => (
             <div 
               key={step.step}
-              className="relative group"
+              className={`relative group opacity-0 animate-fade-in-up ${
+                index === 0 ? 'animation-delay-100' : 
+                index === 1 ? 'animation-delay-300' : 
+                'animation-delay-500'
+              }`}
             >
               {/* Connector line */}
               {index < steps.length - 1 && (
                 <div className="hidden md:block absolute top-12 left-[60%] w-[80%] h-px bg-border" />
               )}
               
-              <div className="relative bg-card border border-border rounded-2xl p-8 hover:border-primary/50 transition-colors">
+              <div className="relative bg-card border border-border rounded-2xl p-8 hover:border-primary/50 transition-all duration-300 hover:translate-y-[-8px] hover:shadow-xl hover:shadow-primary/10">
                 {/* Step number */}
-                <div className="absolute -top-3 right-6 px-3 py-1 bg-primary text-primary-foreground text-sm font-bold rounded-full">
+                <div className="absolute -top-3 right-6 px-3 py-1 bg-primary text-primary-foreground text-sm font-bold rounded-full transition-transform duration-300 group-hover:scale-110">
                   {step.step}
                 </div>
                 
                 {/* Icon */}
-                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
-                  <step.icon className="w-7 h-7 text-primary" />
+                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110">
+                  <step.icon className="w-7 h-7 text-primary transition-transform duration-300 group-hover:rotate-6" />
                 </div>
                 
                 {/* Content */}

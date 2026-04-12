@@ -37,7 +37,14 @@ export function LandingPage({ onAuthSuccess }: LandingPageProps) {
                 { title: "Análisis en Tiempo Real", desc: "Tiempo de lectura y métricas instantáneas" },
                 { title: "Sugerencias de B-roll", desc: "Ideas visuales basadas en tu contenido" },
               ].map((feature, i) => (
-                <div key={i} className="p-6 rounded-2xl bg-card border border-border">
+                <div 
+                  key={i} 
+                  className={`p-6 rounded-2xl bg-card border border-border opacity-0 animate-fade-in-up transition-all duration-300 hover:translate-y-[-6px] hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 ${
+                    i === 0 ? 'animation-delay-100' : 
+                    i === 1 ? 'animation-delay-200' : 
+                    'animation-delay-300'
+                  }`}
+                >
                   <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
                   <p className="text-muted-foreground text-sm">{feature.desc}</p>
                 </div>
@@ -47,9 +54,9 @@ export function LandingPage({ onAuthSuccess }: LandingPageProps) {
         </section>
 
         {/* Footer */}
-        <footer className="py-8 border-t border-border">
+        <footer className="py-8 border-t border-border animate-fade-in">
           <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-            <p>&copy; 2026 Scriptly. Todos los derechos reservados.</p>
+            <p>&copy; 2026 Scriptlyy. Todos los derechos reservados.</p>
           </div>
         </footer>
       </main>

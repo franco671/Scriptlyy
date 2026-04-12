@@ -148,7 +148,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
           <div className="p-4 lg:p-8 pt-16 lg:pt-8 overflow-y-auto h-screen">
             <div className="max-w-4xl mx-auto">
               {/* Welcome header */}
-              <div className="mb-8">
+              <div className="mb-8 opacity-0 animate-fade-in-up">
                 <h1 className="text-3xl font-bold mb-2">Bienvenido de vuelta</h1>
                 <p className="text-muted-foreground">
                   Continúa donde lo dejaste o crea un nuevo guion.
@@ -163,10 +163,15 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                   { label: "Tiempo ahorrado", value: `${estimatedTimeSaved}h`, icon: Clock },
                   { label: "Total palabras", value: totalWords.toLocaleString(), icon: Sparkles },
                 ].map((stat, i) => (
-                  <Card key={i} className="bg-card border-border">
+                  <Card key={i} className={`bg-card border-border opacity-0 animate-fade-in-up transition-all duration-300 hover:translate-y-[-4px] hover:shadow-lg hover:shadow-primary/10 hover:border-primary/30 ${
+                    i === 0 ? 'animation-delay-100' : 
+                    i === 1 ? 'animation-delay-200' : 
+                    i === 2 ? 'animation-delay-300' :
+                    'animation-delay-400'
+                  }`}>
                     <CardContent className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:scale-110">
                           <stat.icon className="w-5 h-5 text-primary" />
                         </div>
                         <div>
@@ -180,7 +185,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
               </div>
 
               {/* Quick action */}
-              <Card className="bg-primary/10 border-primary/20 mb-8">
+              <Card className="bg-primary/10 border-primary/20 mb-8 opacity-0 animate-fade-in-up animation-delay-500 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20">
                 <CardContent className="p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div>
                     <h3 className="font-semibold text-lg mb-1">Crea tu próximo viral</h3>
@@ -188,7 +193,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                       Usa nuestro asistente de IA para generar guiones que retienen audiencia.
                     </p>
                   </div>
-                  <Button onClick={handleNewScript} className="gap-2 whitespace-nowrap">
+                  <Button onClick={handleNewScript} className="gap-2 whitespace-nowrap transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25">
                     <Plus className="w-4 h-4" />
                     Nuevo Guion
                   </Button>
@@ -196,7 +201,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
               </Card>
 
               {/* Recent scripts */}
-              <Card className="bg-card border-border">
+              <Card className="bg-card border-border opacity-0 animate-fade-in-up animation-delay-600">
                 <CardHeader>
                   <CardTitle className="text-lg">Guiones recientes</CardTitle>
                 </CardHeader>
@@ -223,7 +228,7 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                         <button
                           key={guion.id}
                           onClick={() => handleSelectScript(guion)}
-                          className="w-full flex items-center justify-between p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-secondary/50 transition-all text-left group"
+                          className="w-full flex items-center justify-between p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-secondary/50 transition-all duration-300 text-left group hover:translate-x-1 hover:shadow-md"
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">

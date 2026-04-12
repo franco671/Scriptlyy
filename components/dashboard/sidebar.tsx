@@ -77,11 +77,11 @@ export function DashboardSidebar({
     <>
       {/* Logo */}
       <div className="p-4 border-b border-sidebar-border">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+        <div className="flex items-center gap-2 group">
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
             <Sparkles className="w-5 h-5 text-primary-foreground" />
           </div>
-          <span className="font-bold text-lg">Scriptly</span>
+          <span className="font-bold text-lg">Scriptlyy</span>
         </div>
       </div>
 

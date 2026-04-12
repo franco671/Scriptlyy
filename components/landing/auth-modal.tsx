@@ -115,7 +115,7 @@ export function AuthModal({ open, onOpenChange, onSuccess }: AuthModalProps) {
           <div className="mx-auto w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
             <Sparkles className="w-6 h-6 text-primary" />
           </div>
-          <DialogTitle className="text-2xl font-bold"><Scriptly></Scriptly></DialogTitle>
+          <DialogTitle className="text-2xl font-bold">Scriptlyy</DialogTitle>
           <DialogDescription>
             Accede a tu cuenta para empezar a crear guiones increíbles
           </DialogDescription>
