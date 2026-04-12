@@ -3,10 +3,10 @@ export const fetchCache = "force-no-store";
 
 import { ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
-import dynamic from 'next/dynamic'
+import nextDynamic from 'next/dynamic' // Le cambiamos el nombre al import aquí
 
-// Forzamos a que el componente sea SOLO de cliente y no se toque en el build
-const PricingCards = dynamic(
+// Usamos el nuevo nombre 'nextDynamic'
+const PricingCards = nextDynamic(
   () => import('@/components/PricingCards').then((mod) => mod.PricingCards),
   {
     ssr: false,
