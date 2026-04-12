@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       '@ai-sdk/groq':
-        specifier: ^2.0.0
+        specifier: ^2.0.37
         version: 2.0.37(zod@3.25.76)
       '@hookform/resolvers':
         specifier: ^3.9.1

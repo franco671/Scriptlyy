@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 
+const FREE_LIMIT = 5
+
 export async function GET() {
   try {
     const supabase = await createClient()
@@ -20,7 +22,26 @@ export async function GET() {
       throw error
     }
 
-    return NextResponse.json(guiones)
+    // Get premium status from profiles
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("es_premium")
+      .eq("id", user.id)
+      .single()
+
+    const esPremium = profile?.es_premium ?? false
+    const count = guiones?.length ?? 0
+    const canCreate = esPremium || count < FREE_LIMIT
+
+    return NextResponse.json({
+      guiones,
+      meta: {
+        count,
+        limit: FREE_LIMIT,
+        es_premium: esPremium,
+        can_create: canCreate
+      }
+    })
   } catch (error) {
     console.error("Error fetching guiones:", error)
     return NextResponse.json(
@@ -39,7 +60,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 })
     }
 
-    const { titulo, nicho, hook, desarrollo, cta, segundos, visual_suggestions } = await request.json()
+    // Check premium status and current count
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("es_premium")
+      .eq("id", user.id)
+      .single()
+
+    const esPremium = profile?.es_premium ?? false
+
+    if (!esPremium) {
+      const { count } = await supabase
+        .from("guiones")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+
+      if ((count ?? 0) >= FREE_LIMIT) {
+        return NextResponse.json(
+          { error: "Has alcanzado el límite de guiones gratuitos. Actualiza a Premium para continuar." },
+          { status: 403 }
+        )
+      }
+    }
+
+    const { titulo, nicho, hook, desarrollo, cta, segundos, visual_suggestion } = await request.json()
 
     const { data, error } = await supabase
       .from("guiones")
@@ -51,7 +95,7 @@ export async function POST(request: Request) {
         desarrollo,
         cta,
         segundos,
-        visual_suggestions
+        visual_suggestion
       })
       .select()
       .single()

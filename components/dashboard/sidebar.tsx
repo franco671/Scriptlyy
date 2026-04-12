@@ -13,7 +13,8 @@ import {
   LogOut,
   Menu,
   X,
-  Loader2
+  Loader2,
+  Crown
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -25,6 +26,13 @@ interface Guion {
   hook: string
   desarrollo: string
   cta: string
+}
+
+interface GuionesMeta {
+  count: number
+  limit: number
+  es_premium: boolean
+  can_create: boolean
 }
 
 interface SidebarProps {
@@ -46,6 +54,12 @@ export function DashboardSidebar({
 }: SidebarProps) {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [guiones, setGuiones] = useState<Guion[]>([])
+  const [meta, setMeta] = useState<GuionesMeta>({
+    count: 0,
+    limit: 5,
+    es_premium: false,
+    can_create: true
+  })
   const [isLoading, setIsLoading] = useState(true)
   const supabase = createClient()
 
@@ -59,7 +73,10 @@ export function DashboardSidebar({
       const response = await fetch("/api/guiones")
       if (response.ok) {
         const data = await response.json()
-        setGuiones(data)
+        setGuiones(data.guiones || [])
+        if (data.meta) {
+          setMeta(data.meta)
+        }
       }
     } catch (error) {
       console.error("Error fetching guiones:", error)
@@ -87,16 +104,30 @@ export function DashboardSidebar({
 
       {/* New Script Button */}
       <div className="p-4">
-        <Button
-          onClick={() => {
-            onNewScript()
-            setIsMobileOpen(false)
-          }}
-          className="w-full gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Nuevo Guion
-        </Button>
+        {meta.can_create ? (
+          <Button
+            onClick={() => {
+              onNewScript()
+              setIsMobileOpen(false)
+            }}
+            className="w-full gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Nuevo Guion
+          </Button>
+        ) : (
+          <Button
+            className="w-full gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+          >
+            <Crown className="w-4 h-4" />
+            Pasar a Premium
+          </Button>
+        )}
+        {!meta.es_premium && (
+          <p className="text-xs text-muted-foreground text-center mt-2">
+            {meta.count}/{meta.limit} guiones usados
+          </p>
+        )}
       </div>
 
       <ScrollArea className="flex-1 px-2">

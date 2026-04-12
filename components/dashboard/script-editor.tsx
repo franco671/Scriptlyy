@@ -173,8 +173,8 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
           desarrollo: content.body,
           cta: content.cta,
           segundos: estimatedSeconds,
-          // Enviamos las sugerencias para que se guarden en la DB
-          visual_suggestions: displaySuggestions
+          // Enviamos las sugerencias para que se guarden en la DB (singular)
+          visual_suggestion: displaySuggestions
         }),
       })
 
