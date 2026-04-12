@@ -1,130 +1,39 @@
-"use client"
-
-// Esta línea le dice a Next.js: "No intentes pre-renderizar esto, hacelo en vivo"
 export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 
-import { useState, Suspense } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { PRODUCTS } from "@/lib/products"
-import { createCheckoutSession } from "@/app/actions/stripe"
-import { Check, Loader2, Sparkles, ArrowLeft } from "lucide-react"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import dynamic from 'next/dynamic'
 
-function PricingContent() {
-  const [loadingId, setLoadingId] = useState<string | null>(null)
-  const searchParams = useSearchParams()
-  const canceled = searchParams.get("canceled")
-
-  const handlePurchase = async (productId: string) => {
-    try {
-      setLoadingId(productId)
-      const { url } = await createCheckoutSession(productId)
-      if (url) {
-        window.location.href = url
-      }
-    } catch (error) {
-      console.error("Error creating checkout session:", error)
-      alert("Error al procesar el pago. Por favor intenta de nuevo.")
-    } finally {
-      setLoadingId(null)
-    }
+// Forzamos a que el componente sea SOLO de cliente y no se toque en el build
+const PricingCards = dynamic(
+  () => import('@/components/PricingCards').then((mod) => mod.PricingCards),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex flex-col items-center justify-center py-20">
+        <Loader2 className="animate-spin w-8 h-8 text-primary mb-2" />
+        <p className="text-sm text-muted-foreground">Cargando planes...</p>
+      </div>
+    )
   }
-
-  return (
-    <div className="container mx-auto px-4 py-16">
-      <Link href="/dashboard" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8">
-        <ArrowLeft className="w-4 h-4" />
-        Volver al dashboard
-      </Link>
-
-      {canceled && (
-        <div className="mb-8 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-center">
-          <p className="text-destructive">El pago fue cancelado. Puedes intentarlo de nuevo cuando quieras.</p>
-        </div>
-      )}
-
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Comprar Créditos</h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Cada pack de 50 guiones te permite generar contenido nuevo sin límites de tiempo.
-        </p>
-      </div>
-
-      <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-        {PRODUCTS.map((product) => (
-          <Card
-            key={product.id}
-            className={`relative flex flex-col ${product.popular ? "border-primary shadow-lg shadow-primary/20" : ""}`}
-          >
-            {product.popular && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" />
-                  Más Popular
-                </span>
-              </div>
-            )}
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl">{product.name}</CardTitle>
-              <CardDescription>{product.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 text-center">
-              <div className="mb-6">
-                <span className="text-5xl font-bold">${(product.priceInCents / 100).toFixed(0)}</span>
-                <span className="text-muted-foreground ml-1">USD</span>
-              </div>
-              <div className="space-y-3 text-left">
-                <div className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-primary" />
-                  <span>{product.credits} créditos</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-primary" />
-                  <span>IA para guiones virales</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-primary" />
-                  <span>Sugerencias de edición</span>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button
-                className="w-full"
-                size="lg"
-                variant={product.popular ? "default" : "outline"}
-                onClick={() => handlePurchase(product.id)}
-                disabled={loadingId !== null}
-              >
-                {loadingId === product.id ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Cargando...
-                  </>
-                ) : (
-                  "Comprar ahora"
-                )}
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
-    </div>
-  )
-}
+)
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+    <div className="min-h-screen bg-background px-4 py-16">
+      <div className="container mx-auto">
+        <Link href="/dashboard" className="inline-flex items-center gap-2 mb-8 text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="w-4 h-4" /> Volver al dashboard
+        </Link>
+
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-4">Comprar Créditos</h1>
+          <p className="text-muted-foreground text-lg">Elegí el plan para potenciar tu contenido.</p>
         </div>
-      }>
-        <PricingContent />
-      </Suspense>
+
+        <PricingCards />
+      </div>
     </div>
   )
 }
