@@ -9,7 +9,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@ai-sdk/groq": "^2.2.0",
+    "@ai-sdk/groq": "latest",
     "@hookform/resolvers": "^3.9.1",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.4",
