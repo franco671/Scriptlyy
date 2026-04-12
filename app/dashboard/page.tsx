@@ -1,15 +1,12 @@
 "use client"
 
-// Importamos el componente principal desde tu carpeta de components
-import DashboardMain from "@/components/dashboard/dashboard-page"
+// Importamos usando llaves porque no es un export default
+import { DashboardPage } from "@/components/dashboard/dashboard-page"
 
-export default function DashboardPage() {
+export default function Dashboard() {
   return (
     <main>
-      {/* Este componente ya debería tener adentro la Sidebar, 
-          el Script Editor y la lógica de usuario que usabas antes.
-      */}
-      <DashboardMain />
+      <DashboardPage />
     </main>
   )
 }
