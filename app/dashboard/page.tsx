@@ -1,9 +1,9 @@
 "use client"
 
-// Importamos usando llaves porque no es un export default
+// Importamos el componente específico usando llaves { }
 import { DashboardPage } from "@/components/dashboard/dashboard-page"
 
-export default function Dashboard() {
+export default function DashboardRoute() {
   return (
     <main>
       <DashboardPage />
