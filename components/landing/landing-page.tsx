@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Navbar } from "./navbar"
 import { Hero } from "./hero"
 import { HowItWorks } from "./how-it-works"
-import { StatsSection } from "./stats-section"
 import { PricingSection } from "./pricing-section"
 import { FAQSection } from "./faq-section"
 import { AuthModal } from "./auth-modal"
@@ -21,13 +20,8 @@ export function LandingPage({ onAuthSuccess }: LandingPageProps) {
       <Navbar onLogin={() => setAuthModalOpen(true)} />
 
       <main className="pt-16">
-        {/* Hero Section */}
         <Hero onGetStarted={() => setAuthModalOpen(true)} />
 
-        {/* Sección de confianza/Stats */}
-        <StatsSection />
-
-        {/* Características principales */}
         <section id="features" className="py-24">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -55,17 +49,13 @@ export function LandingPage({ onAuthSuccess }: LandingPageProps) {
           </div>
         </section>
 
-        {/* Paso a paso */}
         <HowItWorks />
 
-        {/* Aquí es donde se van a ver tus packs de 5 y 10 USD */}
         <PricingSection />
 
-        {/* Preguntas frecuentes con anclaje funcional */}
         <FAQSection />
       </main>
 
-      {/* Footer integrado (ya que no existe archivo footer.tsx) */}
       <footer className="py-12 border-t border-border bg-card">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
