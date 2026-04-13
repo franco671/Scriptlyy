@@ -10,25 +10,18 @@ export interface Product {
 export const PRODUCTS: Product[] = [
   {
     id: "starter-pack",
-    name: "Starter Pack",
-    description: "10 créditos para generar guiones",
-    priceInCents: 499, // $4.99
-    credits: 10,
-  },
-  {
-    id: "creator-pack",
-    name: "Creator Pack",
-    description: "50 créditos para generar guiones",
-    priceInCents: 1999, // $19.99
+    name: "Pack Creador",
+    description: "50 créditos para guiones virales",
+    priceInCents: 500, // $5.00
     credits: 50,
-    popular: true,
   },
   {
     id: "pro-pack",
-    name: "Pro Pack",
-    description: "150 créditos para generar guiones",
-    priceInCents: 4999, // $49.99
-    credits: 150,
+    name: "Pack Viral",
+    description: "100 Guiones para 100 shorts.",
+    priceInCents: 1000, // $10.00
+    credits: 100,
+    popular: true, // Este es el que va a resaltar en la web
   },
 ]
 
