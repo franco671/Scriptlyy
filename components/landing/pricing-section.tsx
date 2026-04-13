@@ -24,17 +24,15 @@ export function PricingSection({ onGetStarted }: PricingSectionProps) {
 
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {PRODUCTS.map((product, i) => (
-            <Card 
-              key={product.id} 
-              className={`relative flex flex-col opacity-0 animate-fade-in-up transition-all duration-300 hover:translate-y-[-6px] ${
-                product.popular 
-                  ? "border-primary shadow-lg shadow-primary/20" 
+            <Card
+              key={product.id}
+              className={`relative flex flex-col opacity-0 animate-fade-in-up transition-all duration-300 hover:translate-y-[-6px] ${product.popular
+                  ? "border-primary shadow-lg shadow-primary/20"
                   : "hover:border-primary/50"
-              } ${
-                i === 0 ? 'animation-delay-100' : 
-                i === 1 ? 'animation-delay-200' : 
-                'animation-delay-300'
-              }`}
+                } ${i === 0 ? 'animation-delay-100' :
+                  i === 1 ? 'animation-delay-200' :
+                    'animation-delay-300'
+                }`}
             >
               {product.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -73,13 +71,13 @@ export function PricingSection({ onGetStarted }: PricingSectionProps) {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   size="lg"
                   variant={product.popular ? "default" : "outline"}
                   onClick={onGetStarted}
                 >
-                  Empezar gratis
+                  Elegir Plan
                 </Button>
               </CardFooter>
             </Card>
@@ -93,3 +91,4 @@ export function PricingSection({ onGetStarted }: PricingSectionProps) {
     </section>
   )
 }
+
