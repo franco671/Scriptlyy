@@ -1,47 +1,55 @@
 "use client"
 
-import { useState } from "react"
-import { Navbar } from "@/components/landing/navbar"
-import { Hero } from "@/components/landing/hero"
-import { Features } from "@/components/landing/features"
-import { FAQSection } from "@/components/landing/faq-section"
-import { AuthModal } from "@/components/landing/auth-modal"
-import { Footer } from "@/components/landing/footer"
+import { useState, useEffect } from "react"
+import { createClient } from "@/lib/supabase/client"
+import { LandingPage } from "@/components/landing/landing-page"
+import { DashboardPage } from "@/components/dashboard/dashboard-page"
+import { Loader2 } from "lucide-react"
+import type { User } from "@supabase/supabase-js"
 
-interface LandingPageProps {
-  onAuthSuccess: () => void
-}
+export default function Home() {
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const supabase = createClient()
 
-export function LandingPage({ onAuthSuccess }: LandingPageProps) {
-  const [authModalOpen, setAuthModalOpen] = useState(false)
+  useEffect(() => {
+    // Check current session
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+      setIsLoading(false)
+    }
+    checkUser()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [supabase.auth])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground">Cargando...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (user) {
+    return <DashboardPage onLogout={() => setUser(null)} />
+  }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* El Navbar ahora abre el modal y tiene los links activos */}
-      <Navbar onLogin={() => setAuthModalOpen(true)} />
-
-      <main>
-        {/* El Hero también abre el modal al hacer clic en "Comenzar Gratis" */}
-        <Hero onGetStarted={() => setAuthModalOpen(true)} />
-
-        {/* Aquí puedes agregar otras secciones si las tienes, como Stats o Features */}
-        <Features />
-
-        {/* La sección de FAQ que ahora sí responderá al ID #faq */}
-        <FAQSection />
-      </main>
-
-      <Footer />
-
-      {/* Este es el modal que recuperamos hoy del archivo auth-modal.tsx */}
-      <AuthModal
-        open={authModalOpen}
-        onOpenChange={setAuthModalOpen}
-        onSuccess={() => {
-          setAuthModalOpen(false)
-          onAuthSuccess()
-        }}
-      />
-    </div>
+    <LandingPage onAuthSuccess={() => {
+      // Re-check user after auth success
+      supabase.auth.getUser().then(({ data: { user } }) => setUser(user))
+    }} />
   )
 }
