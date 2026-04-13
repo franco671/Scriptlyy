@@ -1,4 +1,4 @@
-""use client"
+"use client"
 
 import { useState } from "react"
 import { Navbar } from "./navbar"
@@ -8,7 +8,6 @@ import { StatsSection } from "./stats-section"
 import { PricingSection } from "./pricing-section"
 import { FAQSection } from "./faq-section"
 import { AuthModal } from "./auth-modal"
-import { Footer } from "./footer" // Asegúrate de que este archivo exista
 
 interface LandingPageProps {
   onAuthSuccess: () => void
@@ -22,13 +21,13 @@ export function LandingPage({ onAuthSuccess }: LandingPageProps) {
       <Navbar onLogin={() => setAuthModalOpen(true)} />
 
       <main className="pt-16">
-        {/* 1. Hero */}
+        {/* Hero Section */}
         <Hero onGetStarted={() => setAuthModalOpen(true)} />
 
-        {/* 2. Stats (El de 10k creadores, etc) */}
+        {/* Sección de confianza/Stats */}
         <StatsSection />
 
-        {/* 3. Características (Features) */}
+        {/* Características principales */}
         <section id="features" className="py-24">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -46,10 +45,7 @@ export function LandingPage({ onAuthSuccess }: LandingPageProps) {
               ].map((feature, i) => (
                 <div
                   key={i}
-                  className={`p-6 rounded-2xl bg-card border border-border opacity-0 animate-fade-in-up transition-all duration-300 hover:translate-y-[-6px] hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 ${i === 0 ? 'animation-delay-100' :
-                      i === 1 ? 'animation-delay-200' :
-                        'animation-delay-300'
-                    }`}
+                  className="p-6 rounded-2xl bg-card border border-border transition-all duration-300 hover:border-primary/50"
                 >
                   <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
                   <p className="text-muted-foreground text-sm">{feature.desc}</p>
@@ -59,18 +55,27 @@ export function LandingPage({ onAuthSuccess }: LandingPageProps) {
           </div>
         </section>
 
-        {/* 4. Cómo funciona */}
+        {/* Paso a paso */}
         <HowItWorks />
 
-        {/* 5. Precios (Aquí aparecerán tus packs de 5 y 10 USD) */}
+        {/* Aquí es donde se van a ver tus packs de 5 y 10 USD */}
         <PricingSection />
 
-        {/* 6. FAQ (Aquí funcionará el ancla #faq) */}
+        {/* Preguntas frecuentes con anclaje funcional */}
         <FAQSection />
       </main>
 
-      {/* 7. Footer profesional */}
-      <Footer />
+      {/* Footer integrado (ya que no existe archivo footer.tsx) */}
+      <footer className="py-12 border-t border-border bg-card">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <span className="font-bold text-xl">Scriptlyy</span>
+          </div>
+          <p className="text-muted-foreground text-sm">
+            &copy; 2026 Scriptlyy. Potenciando creadores en Reconquista y el mundo.
+          </p>
+        </div>
+      </footer>
 
       <AuthModal
         open={authModalOpen}
