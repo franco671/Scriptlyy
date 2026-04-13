@@ -9,14 +9,14 @@ export interface Product {
 
 export const PRODUCTS: Product[] = [
   {
-    id: "starter-pack",
+    id: "price_1TLV5CLe7V0O0f9zMQBraF9m",
     name: "Pack Creador",
     description: "50 créditos para guiones virales",
     priceInCents: 500, // $5.00
     credits: 50,
   },
   {
-    id: "pro-pack",
+    id: "price_1TLmRfLe7V0O0f9zZb5hefMi",
     name: "Pack Viral",
     description: "100 Guiones para 100 shorts.",
     priceInCents: 1000, // $10.00
