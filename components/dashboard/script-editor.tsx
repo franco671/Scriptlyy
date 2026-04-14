@@ -18,7 +18,8 @@ import {
   MessageSquare,
   RefreshCw,
   Loader2,
-  Video
+  Video,
+  X
 } from "lucide-react"
 import type { ScriptFormData } from "./script-form"
 
@@ -56,6 +57,7 @@ const generateFallbackSuggestions = (content: ScriptContent): string[] => {
 export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorProps) {
   const [isSaving, setIsSaving] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isReadingMode, setIsReadingMode] = useState(false) // NUEVO: Estado para el Teleprompter
   const { toast } = useToast()
 
   const [content, setContent] = useState<ScriptContent>({
@@ -65,6 +67,15 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
   })
 
   const [visualSuggestions, setVisualSuggestions] = useState<string[]>([])
+
+  // NUEVO: Cerrar modo lectura con la tecla Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsReadingMode(false)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   useEffect(() => {
     if (formData.mode === "ai" && !content.hook && !content.body && !content.cta) {
@@ -85,7 +96,6 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
     }
   }, [formData])
 
-  // FUNCIÓN ACTUALIZADA: Ahora maneja errores de créditos (403)
   const generateAIContent = async () => {
     setIsGenerating(true)
     try {
@@ -100,7 +110,6 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
         }),
       })
 
-      // Manejo de falta de créditos
       if (response.status === 403) {
         toast({
           title: "Créditos insuficientes",
@@ -129,7 +138,6 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
         description: "La IA ha procesado tu solicitud con éxito.",
       })
 
-      // Refrescamos el contador de créditos en el Sidebar
       if (onSaveSuccess) onSaveSuccess()
 
     } catch (error) {
@@ -220,7 +228,7 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col relative">
       <header className="flex items-center justify-between p-4 border-b bg-card/50">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={onBack}><ArrowLeft className="w-5 h-5" /></Button>
@@ -233,6 +241,17 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {/* BOTÓN NUEVO: Modo Grabación */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsReadingMode(true)}
+            className="border-primary/30 text-primary hover:bg-primary/10"
+          >
+            <Video className="w-4 h-4 mr-2" />
+            Modo Grabación
+          </Button>
+
           <Button variant="outline" size="sm" onClick={handleExport}><Download className="w-4 h-4 mr-2" />Exportar</Button>
           <Button size="sm" onClick={handleSave} disabled={isSaving}>
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
@@ -249,7 +268,7 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
                 <Target className="w-4 h-4 text-chart-5" />
                 <h3 className="font-semibold">Hook</h3>
               </div>
-              <Textarea value={content.hook} onChange={(e) => updateContent("hook", e.target.value)} className="min-h-[100px] bg-card" />
+              <Textarea value={content.hook} onChange={(e) => updateContent("hook", e.target.value)} className="min-h-[100px] bg-card text-lg" />
             </div>
 
             <Separator />
@@ -259,7 +278,7 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
                 <MessageSquare className="w-4 h-4 text-chart-2" />
                 <h3 className="font-semibold">Cuerpo</h3>
               </div>
-              <Textarea value={content.body} onChange={(e) => updateContent("body", e.target.value)} className="min-h-[200px] bg-card" />
+              <Textarea value={content.body} onChange={(e) => updateContent("body", e.target.value)} className="min-h-[200px] bg-card text-lg" />
             </div>
 
             <Separator />
@@ -269,7 +288,7 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
                 <Sparkles className="w-4 h-4 text-chart-1" />
                 <h3 className="font-semibold">CTA</h3>
               </div>
-              <Textarea value={content.cta} onChange={(e) => updateContent("cta", e.target.value)} className="min-h-[80px] bg-card" />
+              <Textarea value={content.cta} onChange={(e) => updateContent("cta", e.target.value)} className="min-h-[80px] bg-card text-lg italic" />
             </div>
           </div>
         </div>
@@ -298,10 +317,9 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
                   <span>{suggestion}</span>
                 </div>
               ))}
-              {/* BOTÓN ACTUALIZADO: Texto más claro y deshabilitado durante carga */}
               <Button
                 variant="ghost"
-                size="xs"
+                size="sm"
                 className="w-full text-[10px] hover:bg-secondary/50"
                 onClick={generateAIContent}
                 disabled={isGenerating}
@@ -313,6 +331,68 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
           </Card>
         </aside>
       </div>
+
+      {/* --- MODAL DE MODO LECTURA (TELEPROMPTER) --- */}
+      {isReadingMode && (
+        <div className="fixed inset-0 z-[100] bg-background flex flex-col p-6 md:p-12 animate-in fade-in duration-300 overflow-hidden">
+          <div className="max-w-5xl mx-auto w-full flex justify-between items-center mb-10 border-b border-border pb-6">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                <h2 className="text-xs font-bold text-primary uppercase tracking-[0.2em]">Teleprompter Activo</h2>
+              </div>
+              <h1 className="text-2xl font-bold">{formData.title}</h1>
+            </div>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => setIsReadingMode(false)}
+              className="rounded-full shadow-sm"
+            >
+              <X className="w-4 h-4 mr-2" /> Salir (Esc)
+            </Button>
+          </div>
+
+          <div className="flex-1 max-w-5xl mx-auto w-full overflow-y-auto space-y-20 pb-40 pr-6 custom-scrollbar">
+            <div className="space-y-6">
+              <Badge className="bg-chart-5/20 text-chart-5 border-none px-4 py-1 text-sm uppercase font-black">Gancho (Hook)</Badge>
+              <p className="text-4xl md:text-7xl font-black leading-[1.1] tracking-tight">
+                {content.hook}
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <Badge className="bg-chart-2/20 text-chart-2 border-none px-4 py-1 text-sm uppercase font-black">Desarrollo</Badge>
+              <p className="text-3xl md:text-5xl font-semibold leading-[1.4] text-muted-foreground">
+                {content.body}
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <Badge className="bg-chart-1/20 text-chart-1 border-none px-4 py-1 text-sm uppercase font-black">Cierre (CTA)</Badge>
+              <p className="text-4xl md:text-7xl font-black leading-[1.1] tracking-tight text-primary italic">
+                {content.cta}
+              </p>
+            </div>
+          </div>
+
+          {/* Estadísticas de apoyo al pie */}
+          <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-xl border border-border px-10 py-5 rounded-full shadow-2xl flex gap-12 items-center z-[101]">
+            <div className="flex flex-col items-center">
+              <span className="text-xs text-muted-foreground uppercase font-bold tracking-tighter">Tiempo Est.</span>
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-primary" />
+                <span className="text-2xl font-black">{estimatedSeconds}s</span>
+              </div>
+            </div>
+            <div className="h-10 w-[1px] bg-border" />
+            <div className="flex flex-col items-center">
+              <span className="text-xs text-muted-foreground uppercase font-bold tracking-tighter">Objetivo</span>
+              <span className="text-2xl font-black text-muted-foreground">{formData.duration}s</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
