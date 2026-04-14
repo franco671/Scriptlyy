@@ -11,7 +11,6 @@ import {
   Save,
   Download,
   Clock,
-  Image,
   Sparkles,
   ArrowLeft,
   Lightbulb,
@@ -43,7 +42,6 @@ const calculateTime = (words: number): number => {
   return Math.round((words / 130) * 60)
 }
 
-// Sugerencias de respaldo (Fallback) si la IA no devuelve nada
 const generateFallbackSuggestions = (content: ScriptContent): string[] => {
   const suggestions: string[] = []
   if (content.hook.toLowerCase().includes("increíble")) suggestions.push("Persona con expresión de asombro")
@@ -66,7 +64,6 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
     cta: "",
   })
 
-  // NUEVO: Estado para las sugerencias que vienen de la IA
   const [visualSuggestions, setVisualSuggestions] = useState<string[]>([])
 
   useEffect(() => {
@@ -82,13 +79,13 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
         body: formData.desarrollo || "",
         cta: formData.cta || "",
       })
-      // Si el objeto formData ya trae sugerencias (del historial), las cargamos
       if (formData.visual_suggestions) {
         setVisualSuggestions(formData.visual_suggestions)
       }
     }
   }, [formData])
 
+  // FUNCIÓN ACTUALIZADA: Ahora maneja errores de créditos (403)
   const generateAIContent = async () => {
     setIsGenerating(true)
     try {
@@ -103,6 +100,16 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
         }),
       })
 
+      // Manejo de falta de créditos
+      if (response.status === 403) {
+        toast({
+          title: "Créditos insuficientes",
+          description: "No tienes créditos suficientes para generar o regenerar este guion.",
+          variant: "destructive",
+        })
+        return
+      }
+
       if (!response.ok) throw new Error("Error al generar")
 
       const data = await response.json()
@@ -113,20 +120,23 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
         cta: data.cta || "",
       })
 
-      // NUEVO: Guardamos las sugerencias dinámicas
       if (data.visual_suggestions) {
         setVisualSuggestions(data.visual_suggestions)
       }
 
       toast({
-        title: "Guion generado",
-        description: "La IA creó el guion y las sugerencias visuales.",
+        title: "Guion actualizado",
+        description: "La IA ha procesado tu solicitud con éxito.",
       })
+
+      // Refrescamos el contador de créditos en el Sidebar
+      if (onSaveSuccess) onSaveSuccess()
+
     } catch (error) {
       console.error(error)
       toast({
         title: "Error",
-        description: "No se pudo generar el contenido.",
+        description: "No se pudo conectar con el servidor.",
         variant: "destructive",
       })
     } finally {
@@ -146,7 +156,6 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
     return calculateTime(totalWords)
   }, [totalWords])
 
-  // NUEVO: Priorizamos las sugerencias de la IA sobre las estáticas
   const displaySuggestions = useMemo(() => {
     if (visualSuggestions.length > 0) return visualSuggestions
     return generateFallbackSuggestions(content)
@@ -173,7 +182,6 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
           desarrollo: content.body,
           cta: content.cta,
           segundos: estimatedSeconds,
-          // Enviamos las sugerencias para que se guarden en la DB (singular)
           visual_suggestion: displaySuggestions
         }),
       })
@@ -290,8 +298,16 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
                   <span>{suggestion}</span>
                 </div>
               ))}
-              <Button variant="ghost" size="xs" className="w-full text-[10px]" onClick={generateAIContent}>
-                <RefreshCw className="w-3 h-3 mr-1" /> Regenerar todo
+              {/* BOTÓN ACTUALIZADO: Texto más claro y deshabilitado durante carga */}
+              <Button
+                variant="ghost"
+                size="xs"
+                className="w-full text-[10px] hover:bg-secondary/50"
+                onClick={generateAIContent}
+                disabled={isGenerating}
+              >
+                <RefreshCw className={`w-3 h-3 mr-1 ${isGenerating ? 'animate-spin' : ''}`} />
+                Regenerar todo (1 crédito)
               </Button>
             </CardContent>
           </Card>
