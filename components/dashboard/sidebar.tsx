@@ -16,7 +16,8 @@ import {
   Menu,
   X,
   Loader2,
-  Coins
+  Coins,
+  Trash2 // <--- Agregado Trash2
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -88,8 +89,34 @@ export function DashboardSidebar({
   }
 
   const handleLogout = async () => {
+    // Cerramos sesión en Supabase
     await supabase.auth.signOut()
+    // Ejecutamos la función de logout que viene por props para limpiar el estado de la app
     onLogout()
+  }
+
+  // Función para manejar el borrado
+  const handleDeleteScript = async (e: React.MouseEvent, id: string, titulo: string) => {
+    e.stopPropagation() // Evita que se seleccione el guion al intentar borrarlo
+
+    if (confirm(`¿Estás seguro de que quieres borrar "${titulo}"?`)) {
+      try {
+        const response = await fetch(`/api/guiones/${id}`, {
+          method: "DELETE",
+        })
+
+        if (response.ok) {
+          fetchGuiones() // Refrescamos la lista
+          if (selectedScript === id) {
+            onNewScript() // Si el guion borrado era el que estaba abierto, reseteamos la vista
+          }
+        } else {
+          alert("Error al borrar el guion")
+        }
+      } catch (error) {
+        console.error("Error deleting script:", error)
+      }
+    }
   }
 
   const sidebarContent = (
@@ -118,10 +145,11 @@ export function DashboardSidebar({
             Nuevo Guion
           </Button>
         ) : (
+          /* Redirige a la sección de precios si no tiene créditos */
           <Button
             onClick={() => {
-              // Si no tiene créditos, mostramos un mensaje o redirigimos
-              alert("Te has quedado sin créditos. ¡Pásate por la sección de precios!")
+              const pricingSection = document.getElementById('pricing');
+              if (pricingSection) pricingSection.scrollIntoView({ behavior: 'smooth' });
               setIsMobileOpen(false);
             }}
             className="w-full gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
@@ -143,7 +171,7 @@ export function DashboardSidebar({
           </div>
           <button
             onClick={() => {
-              onNewScript();
+              onNewScript(); // Al volver al dashboard, reseteamos para crear uno nuevo
               setIsMobileOpen(false);
             }}
             className={cn(
@@ -181,29 +209,41 @@ export function DashboardSidebar({
               </button>
             </div>
           ) : (
-            guiones.map(guion => (
-              <button
-                key={guion.id}
-                onClick={() => {
-                  onSelectScript(guion)
-                  setIsMobileOpen(false)
-                }}
-                className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
-                  selectedScript === guion.id
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                    : "hover:bg-sidebar-accent text-sidebar-foreground"
-                )}
-              >
-                <FileText className="w-4 h-4 flex-shrink-0" />
-                <div className="flex-1 text-left truncate">
-                  <div className="truncate font-medium">{guion.titulo}</div>
-                  <div className="text-xs opacity-60">
-                    {guion.nicho} • {guion.segundos}s
-                  </div>
+            <div className="space-y-1">
+              {guiones.map(guion => (
+                <div key={guion.id} className="group relative flex items-center gap-1">
+                  <button
+                    onClick={() => {
+                      onSelectScript(guion)
+                      setIsMobileOpen(false)
+                    }}
+                    className={cn(
+                      "flex-1 flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
+                      selectedScript === guion.id
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                        : "hover:bg-sidebar-accent text-sidebar-foreground"
+                    )}
+                  >
+                    <FileText className="w-4 h-4 flex-shrink-0" />
+                    <div className="flex-1 text-left truncate">
+                      <div className="truncate font-medium">{guion.titulo}</div>
+                      <div className="text-xs opacity-60">
+                        {guion.nicho} • {guion.segundos}s
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Botón de Borrar (Aparece en hover) */}
+                  <button
+                    onClick={(e) => handleDeleteScript(e, guion.id, guion.titulo)}
+                    className="opacity-0 group-hover:opacity-100 p-2 text-muted-foreground hover:text-red-500 transition-all duration-200"
+                    title="Borrar guion"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
-              </button>
-            ))
+              ))}
+            </div>
           )}
         </div>
       </ScrollArea>
