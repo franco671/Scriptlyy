@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+// Importamos el nuevo modal de configuración
+import { SettingsModal } from "./settings-modal"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -52,6 +54,7 @@ export function DashboardSidebar({
   refreshTrigger = 0
 }: SidebarProps) {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false) // Estado para el modal de configuración
   const [guiones, setGuiones] = useState<Guion[]>([])
   const [meta, setMeta] = useState<GuionesMeta>({
     count: 0,
@@ -85,9 +88,7 @@ export function DashboardSidebar({
   }
 
   const handleLogout = async () => {
-    // Cerramos sesión en Supabase
     await supabase.auth.signOut()
-    // Ejecutamos la función de logout que viene por props para limpiar el estado de la app
     onLogout()
   }
 
@@ -117,11 +118,10 @@ export function DashboardSidebar({
             Nuevo Guion
           </Button>
         ) : (
-          /* Redirige a la sección de precios si no tiene créditos */
           <Button
             onClick={() => {
-              const pricingSection = document.getElementById('pricing');
-              if (pricingSection) pricingSection.scrollIntoView({ behavior: 'smooth' });
+              // Si no tiene créditos, mostramos un mensaje o redirigimos
+              alert("Te has quedado sin créditos. ¡Pásate por la sección de precios!")
               setIsMobileOpen(false);
             }}
             className="w-full gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
@@ -143,7 +143,7 @@ export function DashboardSidebar({
           </div>
           <button
             onClick={() => {
-              onNewScript(); // Al volver al dashboard, reseteamos para crear uno nuevo
+              onNewScript();
               setIsMobileOpen(false);
             }}
             className={cn(
@@ -211,7 +211,7 @@ export function DashboardSidebar({
       {/* Bottom actions */}
       <div className="p-4 border-t border-sidebar-border space-y-1">
         <button
-          onClick={() => alert("Próximamente: Podrás editar tu perfil y preferencias.")}
+          onClick={() => setSettingsOpen(true)} // Abrimos el modal aquí
           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-sidebar-accent text-sm text-sidebar-foreground transition-colors"
         >
           <Settings className="w-4 h-4" />
@@ -253,6 +253,9 @@ export function DashboardSidebar({
       )}>
         {sidebarContent}
       </aside>
+
+      {/* Renderizamos el modal de configuración al final */}
+      <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
     </>
   )
 }
