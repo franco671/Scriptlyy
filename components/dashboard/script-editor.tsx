@@ -57,7 +57,7 @@ const generateFallbackSuggestions = (content: ScriptContent): string[] => {
 export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorProps) {
   const [isSaving, setIsSaving] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [isReadingMode, setIsReadingMode] = useState(false) // NUEVO: Estado para el Teleprompter
+  const [isReadingMode, setIsReadingMode] = useState(false)
   const { toast } = useToast()
 
   const [content, setContent] = useState<ScriptContent>({
@@ -68,7 +68,6 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
 
   const [visualSuggestions, setVisualSuggestions] = useState<string[]>([])
 
-  // NUEVO: Cerrar modo lectura con la tecla Escape
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setIsReadingMode(false)
@@ -229,33 +228,59 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
 
   return (
     <div className="h-full flex flex-col relative">
-      <header className="flex items-center justify-between p-4 border-b bg-card/50">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={onBack}><ArrowLeft className="w-5 h-5" /></Button>
-          <div>
-            <h1 className="font-semibold text-lg">{formData.title}</h1>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Badge variant="secondary">{formData.tone}</Badge>
-              <span>• {formData.duration}s objetivo</span>
+      <header className="flex items-center justify-between p-3 md:p-4 border-b bg-card/50">
+        <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
+          <Button variant="ghost" size="icon" onClick={onBack} className="shrink-0">
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div className="min-w-0 overflow-hidden">
+            <h1 className="font-semibold text-sm md:text-lg truncate max-w-[100px] xs:max-w-[150px] md:max-w-none">
+              {formData.title}
+            </h1>
+            <div className="flex items-center gap-2 text-[10px] md:text-sm text-muted-foreground">
+              <Badge variant="secondary" className="px-1 md:px-2 py-0 text-[9px] md:text-[11px]">{formData.tone}</Badge>
+              <span className="truncate">• {formData.duration}s</span>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {/* BOTÓN NUEVO: Modo Grabación */}
+
+        <div className="flex items-center gap-1 md:gap-2 shrink-0">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setIsReadingMode(true)}
-            className="border-primary/30 text-primary hover:bg-primary/10"
+            className="border-primary/30 text-primary hover:bg-primary/10 px-2 md:px-3"
+            title="Modo Grabación"
           >
-            <Video className="w-4 h-4 mr-2" />
-            Modo Grabación
+            <Video className="w-4 h-4 md:mr-2" />
+            <span className="hidden md:inline">Grabar</span>
           </Button>
 
-          <Button variant="outline" size="sm" onClick={handleExport}><Download className="w-4 h-4 mr-2" />Exportar</Button>
-          <Button size="sm" onClick={handleSave} disabled={isSaving}>
-            {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-            Guardar
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExport}
+            className="px-2 md:px-3"
+            title="Exportar"
+          >
+            <Download className="w-4 h-4 md:mr-2" />
+            <span className="hidden md:inline">Exportar</span>
+          </Button>
+
+          <Button
+            size="sm"
+            onClick={handleSave}
+            disabled={isSaving}
+            className="px-2 md:px-3 bg-primary"
+          >
+            {isSaving ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                <Save className="w-4 h-4 md:mr-2" />
+                <span className="hidden xs:inline md:inline">Guardar</span>
+              </>
+            )}
           </Button>
         </div>
       </header>
@@ -275,125 +300,4 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
 
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-chart-2" />
-                <h3 className="font-semibold">Cuerpo</h3>
-              </div>
-              <Textarea value={content.body} onChange={(e) => updateContent("body", e.target.value)} className="min-h-[200px] bg-card text-lg" />
-            </div>
-
-            <Separator />
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-chart-1" />
-                <h3 className="font-semibold">CTA</h3>
-              </div>
-              <Textarea value={content.cta} onChange={(e) => updateContent("cta", e.target.value)} className="min-h-[80px] bg-card text-lg italic" />
-            </div>
-          </div>
-        </div>
-
-        <aside className="w-full lg:w-80 border-t lg:border-l bg-card/50 p-4 space-y-4 overflow-y-auto">
-          <Card className="bg-secondary/30">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-2"><Clock className="w-4 h-4" />Tiempo</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <span className={`text-4xl font-bold ${durationStatus === "success" ? "text-green-500" : "text-orange-500"}`}>
-                {estimatedSeconds}s
-              </span>
-              <p className="text-xs text-muted-foreground mt-1">Límite: {targetDuration}s</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-secondary/30">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-2"><Video className="w-4 h-4" />Escenas Sugeridas</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {displaySuggestions.map((suggestion, index) => (
-                <div key={index} className="flex items-start gap-2 p-2 rounded bg-background/50 text-xs">
-                  <Lightbulb className="w-3 h-3 text-yellow-500 mt-0.5" />
-                  <span>{suggestion}</span>
-                </div>
-              ))}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full text-[10px] hover:bg-secondary/50"
-                onClick={generateAIContent}
-                disabled={isGenerating}
-              >
-                <RefreshCw className={`w-3 h-3 mr-1 ${isGenerating ? 'animate-spin' : ''}`} />
-                Regenerar todo (1 crédito)
-              </Button>
-            </CardContent>
-          </Card>
-        </aside>
-      </div>
-
-      {/* --- MODAL DE MODO LECTURA (TELEPROMPTER) --- */}
-      {isReadingMode && (
-        <div className="fixed inset-0 z-[100] bg-background flex flex-col p-6 md:p-12 animate-in fade-in duration-300 overflow-hidden">
-          <div className="max-w-5xl mx-auto w-full flex justify-between items-center mb-10 border-b border-border pb-6">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                <h2 className="text-xs font-bold text-primary uppercase tracking-[0.2em]">Teleprompter Activo</h2>
-              </div>
-              <h1 className="text-2xl font-bold">{formData.title}</h1>
-            </div>
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => setIsReadingMode(false)}
-              className="rounded-full shadow-sm"
-            >
-              <X className="w-4 h-4 mr-2" /> Salir (Esc)
-            </Button>
-          </div>
-
-          <div className="flex-1 max-w-5xl mx-auto w-full overflow-y-auto space-y-20 pb-40 pr-6 custom-scrollbar">
-            <div className="space-y-6">
-              <Badge className="bg-chart-5/20 text-chart-5 border-none px-4 py-1 text-sm uppercase font-black">Gancho (Hook)</Badge>
-              <p className="text-4xl md:text-7xl font-black leading-[1.1] tracking-tight">
-                {content.hook}
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              <Badge className="bg-chart-2/20 text-chart-2 border-none px-4 py-1 text-sm uppercase font-black">Desarrollo</Badge>
-              <p className="text-3xl md:text-5xl font-semibold leading-[1.4] text-muted-foreground">
-                {content.body}
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              <Badge className="bg-chart-1/20 text-chart-1 border-none px-4 py-1 text-sm uppercase font-black">Cierre (CTA)</Badge>
-              <p className="text-4xl md:text-7xl font-black leading-[1.1] tracking-tight text-primary italic">
-                {content.cta}
-              </p>
-            </div>
-          </div>
-
-          {/* Estadísticas de apoyo al pie */}
-          <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-xl border border-border px-10 py-5 rounded-full shadow-2xl flex gap-12 items-center z-[101]">
-            <div className="flex flex-col items-center">
-              <span className="text-xs text-muted-foreground uppercase font-bold tracking-tighter">Tiempo Est.</span>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-primary" />
-                <span className="text-2xl font-black">{estimatedSeconds}s</span>
-              </div>
-            </div>
-            <div className="h-10 w-[1px] bg-border" />
-            <div className="flex flex-col items-center">
-              <span className="text-xs text-muted-foreground uppercase font-bold tracking-tighter">Objetivo</span>
-              <span className="text-2xl font-black text-muted-foreground">{formData.duration}s</span>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
+                <MessageSquare className="w-
