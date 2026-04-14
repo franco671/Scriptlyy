@@ -44,8 +44,6 @@ interface SidebarProps {
   refreshTrigger?: number
 }
 
-
-
 export function DashboardSidebar({
   onNewScript,
   onSelectScript,
@@ -87,7 +85,9 @@ export function DashboardSidebar({
   }
 
   const handleLogout = async () => {
+    // Cerramos sesión en Supabase
     await supabase.auth.signOut()
+    // Ejecutamos la función de logout que viene por props para limpiar el estado de la app
     onLogout()
   }
 
@@ -103,7 +103,7 @@ export function DashboardSidebar({
         </div>
       </div>
 
-      {/* New Script Button */}
+      {/* New Script Button / Buy Credits */}
       <div className="p-4">
         {meta.can_create ? (
           <Button
@@ -117,16 +117,20 @@ export function DashboardSidebar({
             Nuevo Guion
           </Button>
         ) : (
-          <Link href="/pricing">
-            <Button
-              className="w-full gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
-            >
-              <Coins className="w-4 h-4" />
-              Comprar créditos
-            </Button>
-          </Link>
+          /* Redirige a la sección de precios si no tiene créditos */
+          <Button
+            onClick={() => {
+              const pricingSection = document.getElementById('pricing');
+              if (pricingSection) pricingSection.scrollIntoView({ behavior: 'smooth' });
+              setIsMobileOpen(false);
+            }}
+            className="w-full gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+          >
+            <Coins className="w-4 h-4" />
+            Comprar créditos
+          </Button>
         )}
-        <p className="text-xs text-muted-foreground text-center mt-2">
+        <p className="text-xs text-muted-foreground text-center mt-2 font-medium">
           {meta.creditos} créditos disponibles
         </p>
       </div>
@@ -137,7 +141,16 @@ export function DashboardSidebar({
           <div className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
             Acceso Rápido
           </div>
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-sidebar-accent text-sm text-sidebar-foreground transition-colors">
+          <button
+            onClick={() => {
+              onNewScript(); // Al volver al dashboard, reseteamos para crear uno nuevo
+              setIsMobileOpen(false);
+            }}
+            className={cn(
+              "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
+              !selectedScript ? "bg-sidebar-accent text-sidebar-foreground" : "hover:bg-sidebar-accent text-sidebar-foreground"
+            )}
+          >
             <Home className="w-4 h-4" />
             Dashboard
           </button>
@@ -197,13 +210,16 @@ export function DashboardSidebar({
 
       {/* Bottom actions */}
       <div className="p-4 border-t border-sidebar-border space-y-1">
-        <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-sidebar-accent text-sm text-sidebar-foreground transition-colors">
+        <button
+          onClick={() => alert("Próximamente: Podrás editar tu perfil y preferencias.")}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-sidebar-accent text-sm text-sidebar-foreground transition-colors"
+        >
           <Settings className="w-4 h-4" />
           Configuración
         </button>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-sidebar-accent text-sm text-muted-foreground transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-sidebar-accent text-sm text-red-500/80 hover:text-red-500 transition-colors"
         >
           <LogOut className="w-4 h-4" />
           Cerrar Sesión
