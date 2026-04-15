@@ -67,7 +67,7 @@ Responde ÚNICAMENTE con el objeto JSON puro, sin texto adicional:
     const { text } = await generateText({
       model: groq("llama-3.3-70b-versatile"),
       prompt,
-      temperature: 0.7, // Bajamos un poco para más consistencia
+      temperature: 0.8, // Bajamos un poco para más consistencia
     })
 
     // Limpieza de JSON robusta
