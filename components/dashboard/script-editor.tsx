@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -250,6 +249,29 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
         </div>
 
         <div className="flex items-center gap-1 md:gap-2 shrink-0">
+          {/* BOTÓN REGENERAR TODO */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              if (window.confirm("¿Quieres volver a generar todo el guion? Esto consumirá 1 crédito.")) {
+                generateAIContent()
+              }
+            }}
+            disabled={isGenerating}
+            className="border-amber-500/30 text-amber-600 hover:bg-amber-50 px-2 md:px-3"
+            title="Regenerar con IA"
+          >
+            {isGenerating ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4 md:mr-2" />
+                <span className="hidden md:inline">Regenerar todo</span>
+              </>
+            )}
+          </Button>
+
           <Button
             variant="outline"
             size="sm"
