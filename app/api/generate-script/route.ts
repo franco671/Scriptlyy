@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
     if (!user) return NextResponse.json({ error: "No autorizado" }, { status: 401 })
 
-    // --- BLOQUE DE SEGURIDAD: VERIFICACIÓN DE CRÉDITOS ---
+    // 1. VERIFICACIÓN DE CRÉDITOS
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('creditos')
@@ -27,12 +27,11 @@ export async function POST(request: Request) {
         { status: 403 }
       )
     }
-    // ---------------------------------------------------
 
     const { title, topic, tone, duration } = await request.json()
 
     let sentenceCount = 3;
-    let targetWords = Math.floor(duration * 2.0);
+    let targetWords = Math.floor(duration * 2.1); // Un pelín más para cubrir silencios
 
     if (duration <= 35) {
       sentenceCount = 3;
@@ -43,22 +42,21 @@ export async function POST(request: Request) {
     }
 
     const prompt = `Actúa como un guionista experto en YouTube Shorts virales. 
-Tu misión es escribir un guion sobre "${topic}" para un video que dure exactamente ${duration} segundos.
+Tu misión es escribir un guion sobre "${topic}" para un video de ${duration} segundos.
 
-REGLAS DE EXTENSIÓN (CRÍTICO):
-1. El "desarrollo" DEBE tener exactamente ${sentenceCount} oraciones largas, descriptivas y fluidas. No resumas en una sola línea.
-2. El total de palabras debe ser de aproximadamente ${targetWords} palabras para llenar el tiempo de ${duration}s.
+REGLAS (CRÍTICO):
+1. El "desarrollo" DEBE tener exactamente ${sentenceCount} oraciones largas y fluidas.
+2. Total de palabras aproximado: ${targetWords}.
+3. El tono debe ser: ${tone}.
+4. Título de referencia: ${title}.
 
 ESTRUCTURA DEL JSON:
-- hook: Una frase de impacto que frene el scroll, usar frases como "¿Sabia que...?, frases que impacten al espectador y que genere curiosidad (20-30 palabras).
-- desarrollo: Un solo bloque de texto narrativo con las ${sentenceCount} oraciones detalladas.
-- cta: Una pregunta final para generar debate en los comentarios (12-15 palabras).
-- visual_suggestions: Lista de 3 sugerencias de clips o imágenes.
+- hook: Frase de impacto inicial, como alguna pregunta o algo muy curioso (curiosidad/asombro).
+- desarrollo: Un solo párrafo con las ${sentenceCount} oraciones.
+- cta: Pregunta final para comentarios.
+- visual_suggestions: Lista de 3 clips visuales.
 
-Tono: ${tone}
-Título del video: ${title}
-
-Responde ÚNICAMENTE con este JSON:
+Responde ÚNICAMENTE con el objeto JSON puro, sin texto adicional:
 {
   "hook": "...",
   "desarrollo": "...",
@@ -69,16 +67,16 @@ Responde ÚNICAMENTE con este JSON:
     const { text } = await generateText({
       model: groq("llama-3.3-70b-versatile"),
       prompt,
-      temperature: 0.8,
+      temperature: 0.7, // Bajamos un poco para más consistencia
     })
 
+    // Limpieza de JSON robusta
     const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) throw new Error("Error en el formato de respuesta")
+    if (!jsonMatch) throw new Error("La IA no devolvió un formato válido")
 
-    const generatedContent = JSON.parse(jsonMatch[0])
+    const generatedContent = JSON.parse(jsonMatch[0].trim())
 
-    // --- BLOQUE DE SEGURIDAD: DESCUENTO DE CRÉDITO ---
-    // Solo descontamos si la IA respondió con éxito
+    // 2. DESCUENTO DE CRÉDITO
     const { error: updateError } = await supabase
       .from('profiles')
       .update({ creditos: profile.creditos - 1 })
@@ -86,10 +84,7 @@ Responde ÚNICAMENTE con este JSON:
 
     if (updateError) {
       console.error("Error al descontar crédito:", updateError)
-      // Opcional: podrías decidir si fallar o dejarlo pasar, 
-      // pero mejor fallar para evitar que se bugee el sistema.
     }
-    // ---------------------------------------------------
 
     return NextResponse.json(generatedContent)
 
