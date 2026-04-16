@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
+// IMPORTAMOS jsPDF
+import jsPDF from "jspdf"
 import {
   Save,
   Download,
@@ -209,14 +211,76 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
     }
   }
 
+  // NUEVA FUNCIÓN DE EXPORTACIÓN A PDF
   const handleExport = () => {
-    const fullScript = `# ${formData.title}\n\n## Sugerencias Visuales\n- ${displaySuggestions.join('\n- ')}\n\n## Hook\n${content.hook}\n\n## Cuerpo\n${content.body}\n\n## CTA\n${content.cta}`
-    const blob = new Blob([fullScript], { type: "text/markdown" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `${formData.title.toLowerCase()}.md`
-    a.click()
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let cursorY = 20;
+
+    // Estilo de encabezado
+    doc.setFontSize(10);
+    doc.setTextColor(150);
+    doc.text("Generado por Scriptlyy.com", 10, 10);
+
+    // Título
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.setTextColor(0);
+    doc.text(formData.title, 10, cursorY);
+    cursorY += 10;
+
+    // Línea divisoria
+    doc.setDrawColor(200);
+    doc.line(10, cursorY, pageWidth - 10, cursorY);
+    cursorY += 10;
+
+    // Sección: Sugerencias Visuales
+    doc.setFontSize(12);
+    doc.text("Sugerencias Visuales:", 10, cursorY);
+    cursorY += 7;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    displaySuggestions.forEach(s => {
+      const wrappedS = doc.splitTextToSize(`• ${s}`, pageWidth - 20);
+      doc.text(wrappedS, 10, cursorY);
+      cursorY += (wrappedS.length * 5);
+    });
+    cursorY += 5;
+
+    // Sección: Hook
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("1. HOOK", 10, cursorY);
+    cursorY += 7;
+    doc.setFont("helvetica", "normal");
+    const hookLines = doc.splitTextToSize(content.hook, pageWidth - 20);
+    doc.text(hookLines, 10, cursorY);
+    cursorY += (hookLines.length * 6) + 5;
+
+    // Sección: Cuerpo
+    doc.setFont("helvetica", "bold");
+    doc.text("2. DESARROLLO", 10, cursorY);
+    cursorY += 7;
+    doc.setFont("helvetica", "normal");
+    const bodyLines = doc.splitTextToSize(content.body, pageWidth - 20);
+    doc.text(bodyLines, 10, cursorY);
+    cursorY += (bodyLines.length * 6) + 5;
+
+    // Sección: CTA
+    doc.setFont("helvetica", "bold");
+    doc.text("3. CTA (Llamado a la acción)", 10, cursorY);
+    cursorY += 7;
+    doc.setFont("helvetica", "normal");
+    const ctaLines = doc.splitTextToSize(content.cta, pageWidth - 20);
+    doc.text(ctaLines, 10, cursorY);
+
+    // Descargar
+    doc.save(`${formData.title.replace(/\s+/g, '_')}_Scriptlyy.pdf`);
+
+    toast({
+      title: "PDF Generado",
+      description: "Tu guion se ha descargado correctamente.",
+    });
   }
 
   if (isGenerating) {
@@ -249,7 +313,6 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
         </div>
 
         <div className="flex items-center gap-1 md:gap-2 shrink-0">
-          {/* BOTÓN REGENERAR TODO */}
           <Button
             variant="outline"
             size="sm"
@@ -288,10 +351,10 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
             size="sm"
             onClick={handleExport}
             className="px-2 md:px-3"
-            title="Exportar"
+            title="Exportar PDF"
           >
             <Download className="w-4 h-4 md:mr-2" />
-            <span className="hidden md:inline">Exportar</span>
+            <span className="hidden md:inline">PDF</span>
           </Button>
 
           <Button
@@ -301,142 +364,4 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
             className="px-2 md:px-3 bg-primary"
           >
             {isSaving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <>
-                <Save className="w-4 h-4 md:mr-2" />
-                <span className="hidden xs:inline md:inline">Guardar</span>
-              </>
-            )}
-          </Button>
-        </div>
-      </header>
-
-      <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
-        <div className="flex-1 overflow-y-auto p-4 lg:p-6">
-          <div className="max-w-2xl mx-auto space-y-6">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-chart-5" />
-                <h3 className="font-semibold">Hook</h3>
-              </div>
-              <Textarea value={content.hook} onChange={(e) => updateContent("hook", e.target.value)} className="min-h-[100px] bg-card text-lg" />
-            </div>
-
-            <Separator />
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-chart-2" />
-                <h3 className="font-semibold">Desarrollo</h3>
-              </div>
-              <Textarea value={content.body} onChange={(e) => updateContent("body", e.target.value)} className="min-h-[300px] bg-card text-lg" />
-            </div>
-
-            <Separator />
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <RefreshCw className="w-4 h-4 text-chart-1" />
-                <h3 className="font-semibold">CTA</h3>
-              </div>
-              <Textarea value={content.cta} onChange={(e) => updateContent("cta", e.target.value)} className="min-h-[80px] bg-card text-lg" />
-            </div>
-          </div>
-        </div>
-
-        <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l bg-card/30 overflow-y-auto p-4 md:p-6">
-          <div className="space-y-6">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  Estadísticas
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs text-muted-foreground">Tiempo est.</span>
-                  <span className={`text-sm font-bold text-${durationStatus}`}>
-                    {estimatedSeconds}s / {formData.duration}s
-                  </span>
-                </div>
-                <div className="w-full bg-secondary h-1.5 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full bg-${durationStatus === 'success' ? 'primary' : 'warning'} transition-all`}
-                    style={{ width: `${Math.min((estimatedSeconds / targetDuration) * 100, 100)}%` }}
-                  />
-                </div>
-                <p className="text-[10px] text-muted-foreground mt-2">
-                  ~ {totalWords} palabras (ritmo de 130 ppm)
-                </p>
-              </CardContent>
-            </Card>
-
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-primary" />
-                Sugerencias Visuales
-              </h3>
-              <div className="space-y-2">
-                {displaySuggestions.map((suggestion, index) => (
-                  <div key={index} className="flex gap-3 p-3 rounded-lg bg-card border text-xs leading-relaxed">
-                    <div className="w-5 h-5 rounded bg-primary/10 text-primary flex items-center justify-center shrink-0 font-bold">
-                      {index + 1}
-                    </div>
-                    {suggestion}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </aside>
-      </div>
-
-      {isReadingMode && (
-        <div className="absolute inset-0 z-50 bg-background flex flex-col">
-          <header className="p-4 border-b flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <h2 className="font-bold">Modo Grabación</h2>
-              <Badge variant="outline" className="animate-pulse border-red-500 text-red-500">
-                REC READY
-              </Badge>
-            </div>
-            <Button variant="ghost" size="icon" onClick={() => setIsReadingMode(false)}>
-              <X className="w-6 h-6" />
-            </Button>
-          </header>
-          <div className="flex-1 overflow-y-auto p-6 md:p-12 text-center max-w-4xl mx-auto w-full">
-            <div className="space-y-12 pb-24">
-              <div className="space-y-4">
-                <Badge variant="secondary">HOOK</Badge>
-                <p className="text-3xl md:text-5xl font-bold leading-tight">{content.hook}</p>
-              </div>
-              <div className="space-y-4">
-                <Badge variant="secondary">CUERPO</Badge>
-                <p className="text-2xl md:text-4xl text-muted-foreground leading-relaxed">{content.body}</p>
-              </div>
-              <div className="space-y-4">
-                <Badge variant="secondary">CTA</Badge>
-                <p className="text-2xl md:text-4xl font-semibold italic">{content.cta}</p>
-              </div>
-            </div>
-          </div>
-          <footer className="p-6 border-t bg-card/50 flex justify-center">
-            <div className="flex items-center gap-8 text-muted-foreground">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-foreground">{estimatedSeconds}s</p>
-                <p className="text-xs uppercase tracking-widest">Duración</p>
-              </div>
-              <Separator orientation="vertical" className="h-10" />
-              <div className="text-center">
-                <p className="text-2xl font-bold text-foreground">{totalWords}</p>
-                <p className="text-xs uppercase tracking-widest">Palabras</p>
-              </div>
-            </div>
-          </footer>
-        </div>
-      )}
-    </div>
-  )
-}
+              <Loader2 className="w-4 h-
