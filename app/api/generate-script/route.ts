@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     const { title, topic, tone, duration } = await request.json()
 
     let sentenceCount = 3;
-    let targetWords = Math.floor(duration * 2.1); // Un pelín más para cubrir silencios
+    let targetWords = Math.floor(duration * 1.9)
 
     if (duration <= 35) {
       sentenceCount = 3;
