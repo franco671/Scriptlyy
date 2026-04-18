@@ -41,22 +41,27 @@ export async function POST(request: Request) {
       sentenceCount = 8;
     }
 
-    const prompt = `Actúa como un guionista experto en YouTube Shorts virales. 
+    const prompt = `Actúa como un guionista de YouTube Shorts especializado en retención extrema (estilo MrBeast o Ryan Trahan). 
+Estamos en el año 2026, así que usa datos ACTUALIZADOS (Ej: Real Madrid tiene 15 Champions).
+
 Tu misión es escribir un guion sobre "${topic}" para un video de ${duration} segundos.
 
-REGLAS (CRÍTICO):
-1. El "desarrollo" DEBE tener exactamente ${sentenceCount} oraciones largas y fluidas.
-2. Total de palabras aproximado: ${targetWords}.
-3. El tono debe ser: ${tone}.
-4. Título de referencia: ${title}.
+REGLAS DE ORO (CRÍTICO):
+1. HOOK SIN CLICHÉS: NO empieces siempre con preguntas tipo "¿Sabías que...?". 
+   - Alterna entre: Una afirmación chocante, un dato contundente o un mito desmentido. 
+   - Debe ser una bofetada de información en los primeros 2 segundos.
+2. DESARROLLO DINÁMICO: Debe tener exactamente ${sentenceCount} oraciones. Evita el tono de Wikipedia; usa un lenguaje narrativo, con tensión y ritmo.
+3. PRECISIÓN 2026: Si mencionas estadísticas, asegúrate de que reflejen la actualidad de 2026.
+4. Total de palabras aproximado: ${targetWords}.
+5. Tono: ${tone}. Título: ${title}.
 
 ESTRUCTURA DEL JSON:
-- hook: Frase de impacto inicial, como alguna pregunta o algo muy curioso (curiosidad/asombro).
-- desarrollo: Un solo párrafo con las ${sentenceCount} oraciones.
-- cta: Pregunta final para comentarios.
-- visual_suggestions: Lista de 3 clips visuales.
+- hook: La frase de impacto (sin "Hola" ni introducciones).
+- desarrollo: Un solo párrafo con las ${sentenceCount} oraciones fluidas.
+- cta: Un cierre que obligue a la gente a pelearse o debatir en los comentarios.
+- visual_suggestions: 3 clips visuales dinámicos.
 
-Responde ÚNICAMENTE con el objeto JSON puro, sin texto adicional:
+Responde ÚNICAMENTE el objeto JSON puro:
 {
   "hook": "...",
   "desarrollo": "...",
