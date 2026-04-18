@@ -8,8 +8,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Scriptlyy - AI-Powered YouTube Shorts Scripts',
-  description: 'Create engaging YouTube Shorts scripts that retain audience attention in seconds. AI-assisted scriptwriting for creators.',
+  title: 'Guiones cortos de YouTube impulsados por IA',
+  description: 'Cree guiones atractivos de YouTube Shorts que retengan la atención de la audiencia en segundos. Escritura de guiones asistida por IA para creadores',
   generator: 'Scriptlyy',
   icons: {
     icon: [
