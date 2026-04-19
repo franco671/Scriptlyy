@@ -49,7 +49,7 @@ Tu misión es escribir un guion sobre "${topic}" para un video de ${duration} se
 
 REGLAS DE ORO (MÁXIMA PRIORIDAD):
 1. HOOK RADICAL: Prohibido empezar con "¿Sabías que...?", fechas o nombres propios. Empieza con una curiosidad visual, una amenaza o una promesa de valor inmediata. El espectador debe sentir que se pierde algo si hace scroll.
-2. NARRATIVA Y ECONOMÍA DE TIEMPO: Debe tener exactamente ${sentenceCount} oraciones. SÉ ESTRICTO: El guion total no debe superar las ${targetWords} palabras. Si la descripción es larga, filtra solo lo más impactante. Usa el estilo "Storytelling de impacto", no describas hechos, cuenta una historia cinematográfica.
+2. NARRATIVA Y PRECISIÓN TEMPORAL: El guion debe acercarse lo más posible a los ${duration} segundos. Usa aproximadamente ${targetWords} palabras (margen de +/- 10%). SÉ EQUILIBRADO: No resumas tanto que el guion dure la mitad del tiempo pedido. Debe tener exactamente ${sentenceCount} oraciones bien desarrolladas con estilo "Storytelling de impacto"..
 3. FILTRO DE COHERENCIA: No mezcles analogías deportivas en temas científicos o históricos. 
 4. TONO: Aplica estrictamente el tono "${tone}" basándote en el título "${title}".
    - Si es Misterio: Usa preguntas retóricas y sombras.
