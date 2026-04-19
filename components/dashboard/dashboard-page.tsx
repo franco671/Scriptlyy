@@ -13,8 +13,11 @@ import {
   Clock,
   Sparkles,
   ArrowRight,
-  Loader2
+  Loader2,
+  Crown,
+  Coins
 } from "lucide-react"
+import Link from "next/link"
 
 type DashboardView = "home" | "form" | "editor"
 
@@ -27,6 +30,13 @@ interface Guion {
   cta: string
   segundos: number
   created_at: string
+}
+
+interface GuionesMeta {
+  count: number
+  creditos: number
+  es_premium: boolean
+  can_create: boolean
 }
 
 interface DashboardPageProps {
@@ -59,6 +69,12 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
   const [selectedScript, setSelectedScript] = useState<string | null>(null)
   const [formData, setFormData] = useState<ScriptFormData | null>(null)
   const [guiones, setGuiones] = useState<Guion[]>([])
+  const [meta, setMeta] = useState<GuionesMeta>({
+    count: 0,
+    creditos: 5,
+    es_premium: false,
+    can_create: true
+  })
   const [isLoading, setIsLoading] = useState(true)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
 
@@ -72,7 +88,10 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
       const response = await fetch("/api/guiones")
       if (response.ok) {
         const data = await response.json()
-        setGuiones(data)
+        setGuiones(data.guiones || [])
+        if (data.meta) {
+          setMeta(data.meta)
+        }
       }
     } catch (error) {
       console.error("Error fetching guiones:", error)
@@ -158,9 +177,13 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
               {/* Quick stats */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 {[
+                  { 
+                    label: "Créditos disponibles", 
+                    value: meta.creditos.toString(), 
+                    icon: Coins 
+                  },
                   { label: "Guiones creados", value: totalGuiones.toString(), icon: FileText },
                   { label: "Este mes", value: thisMonthGuiones.toString(), icon: TrendingUp },
-                  { label: "Tiempo ahorrado", value: `${estimatedTimeSaved}h`, icon: Clock },
                   { label: "Total palabras", value: totalWords.toLocaleString(), icon: Sparkles },
                 ].map((stat, i) => (
                   <Card key={i} className={`bg-card border-border opacity-0 animate-fade-in-up transition-all duration-300 hover:translate-y-[-4px] hover:shadow-lg hover:shadow-primary/10 hover:border-primary/30 ${
@@ -184,21 +207,45 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                 ))}
               </div>
 
-              {/* Quick action */}
-              <Card className="bg-primary/10 border-primary/20 mb-8 opacity-0 animate-fade-in-up animation-delay-500 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20">
-                <CardContent className="p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div>
-                    <h3 className="font-semibold text-lg mb-1">Crea tu próximo viral</h3>
-                    <p className="text-muted-foreground text-sm">
-                      Usa nuestro asistente de IA para generar guiones que retienen audiencia.
-                    </p>
-                  </div>
-                  <Button onClick={handleNewScript} className="gap-2 whitespace-nowrap transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25">
-                    <Plus className="w-4 h-4" />
-                    Nuevo Guion
-                  </Button>
-                </CardContent>
-              </Card>
+              {/* Quick action or Buy credits */}
+              {!meta.can_create ? (
+                <Card className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-500/30 mb-8 opacity-0 animate-fade-in-up animation-delay-500 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/20">
+                  <CardContent className="p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Coins className="w-5 h-5 text-amber-500" />
+                        <h3 className="font-semibold text-lg">Te quedaste sin créditos</h3>
+                      </div>
+                      <p className="text-muted-foreground text-sm">
+                        Compra más créditos para seguir creando guiones virales con IA.
+                      </p>
+                    </div>
+                    <Link href="/pricing">
+                      <Button 
+                        className="gap-2 whitespace-nowrap bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                      >
+                        <Coins className="w-4 h-4" />
+                        Comprar créditos
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="bg-primary/10 border-primary/20 mb-8 opacity-0 animate-fade-in-up animation-delay-500 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20">
+                  <CardContent className="p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                      <h3 className="font-semibold text-lg mb-1">Crea tu próximo viral</h3>
+                      <p className="text-muted-foreground text-sm">
+                        Tienes {meta.creditos} créditos disponibles. Usa IA para generar contenido que retiene audiencia.
+                      </p>
+                    </div>
+                    <Button onClick={handleNewScript} className="gap-2 whitespace-nowrap transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25">
+                      <Plus className="w-4 h-4" />
+                      Nuevo Guion
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Recent scripts */}
               <Card className="bg-card border-border opacity-0 animate-fade-in-up animation-delay-600">
@@ -217,10 +264,19 @@ export function DashboardPage({ onLogout }: DashboardPageProps) {
                       <p className="text-sm text-muted-foreground mb-4">
                         Crea tu primer guion con ayuda de la IA
                       </p>
-                      <Button onClick={handleNewScript} className="gap-2">
-                        <Plus className="w-4 h-4" />
-                        Crear primer guion
-                      </Button>
+                      {meta.can_create ? (
+                        <Button onClick={handleNewScript} className="gap-2">
+                          <Plus className="w-4 h-4" />
+                          Crear primer guion
+                        </Button>
+                      ) : (
+                        <Link href="/pricing">
+                          <Button className="gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
+                            <Coins className="w-4 h-4" />
+                            Comprar créditos
+                          </Button>
+                        </Link>
+                      )}
                     </div>
                   ) : (
                     <div className="space-y-3">
