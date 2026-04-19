@@ -41,26 +41,28 @@ export async function POST(request: Request) {
       sentenceCount = 8;
     }
 
-    const prompt = `Actúa como un experto guionista de YouTube Shorts para canales de curiosidades y tecnología, historia, etc.especializado en retención extrema (estilo MrBeast o Ryan Trahan). 
+    const prompt = `Actúa como un experto guionista de YouTube Shorts especializado en retención extrema y viralidad (estilo "Faceless Channels").
 
-CONTEXTO TEMPORAL: Estamos en el año 2026. Usa datos y estadísticas que reflejen la actualidad de este año de forma natural. 
+CONTEXTO TEMPORAL: Estamos en el año 2026. Es OBLIGATORIO que los datos estadísticos, récords y cifras reflejen la actualidad de 2026. Si no tienes el dato exacto de 2026, utiliza aproximaciones como "superando los..." o "cerca de llegar a...". PROHIBIDO usar datos de 2023 o anteriores.
 
 Tu misión es escribir un guion sobre "${topic}" para un video de ${duration} segundos.
 
-REGLAS DE ORO (CRÍTICO):
-1. HOOK DE IMPACTO: PROHIBIDO empezar con "¿Sabías que...?". Empieza con una afirmación chocante, un mito desmentido o una verdad incómoda. Debe atrapar en menos de 2 segundos.
-2. NARRATIVA DINÁMICA: Debe tener exactamente ${sentenceCount} oraciones. Evita el tono educativo/aburrido; usa tensión y ritmo narrativo.
-3. COHERENCIA 2026: Usa el contexto de 2026 solo si es RELEVANTE para el tema (ej: IA en medicina, nuevas misiones espaciales, datos actuales). NO menciones deportes en temas de ciencia o tecnología a menos que sea el tema central.
-4. EXTENSIÓN: Aproximadamente ${targetWords} palabras para un ritmo de lectura fluido.
-5. TONO Y TÍTULO: Aplica un tono "${tone}" basado en el título "${title}".
+REGLAS DE ORO (MÁXIMA PRIORIDAD):
+1. HOOK RADICAL: Prohibido empezar con "¿Sabías que...?", fechas o nombres propios. Empieza con una curiosidad visual, una amenaza o una promesa de valor inmediata. El espectador debe sentir que se pierde algo si hace scroll.
+2. NARRATIVA DE TENSIÓN: Debe tener exactamente ${sentenceCount} oraciones. Usa el estilo "Storytelling de impacto". No describas hechos, cuenta una historia de forma cinematográfica.
+3. FILTRO DE COHERENCIA: No mezcles analogías deportivas en temas científicos o históricos.
+4. TONO: Aplica estrictamente el tono "${tone}" basándote en el título "${title}".
+   - Si es Misterio: Usa preguntas retóricas y sombras.
+   - Si es Enérgico: Usa verbos de acción y frases cortas.
+   - Si es Educativo: Revela secretos, no des lecciones.
 
 ESTRUCTURA DEL JSON:
-- hook: La frase de impacto.
-- desarrollo: Un solo párrafo con las ${sentenceCount} oraciones.
-- cta: Un cierre que genere debate o invite a comentar una opinión personal.
-- visual_suggestions: Una lista de 5 sugerencias visuales específicas (una para el hook, tres para el desarrollo y una para el cierre).
+- hook: La frase que rompe el scroll.
+- desarrollo: Un solo párrafo con las ${sentenceCount} oraciones que mantienen la tensión.
+- cta: Un cierre que obligue al usuario a comentar su teoría o postura.
+- visual_suggestions: Lista de 5 sugerencias (1 hook, 3 desarrollo, 1 cta). Ejemplo de formato: "[Toma cinemática de...]"
 
-Responde ÚNICAMENTE el objeto JSON puro, sin texto adicional:
+Responde ÚNICAMENTE el objeto JSON puro:
 {
   "hook": "...",
   "desarrollo": "...",
