@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
-// IMPORTAMOS jsPDF
 import jsPDF from "jspdf"
 import {
   Save,
@@ -69,6 +68,21 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
 
   const [visualSuggestions, setVisualSuggestions] = useState<string[]>([])
 
+  // --- NUEVO: BLOQUEO DE F5 Y REFRESCO ---
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Si hay contenido, activamos el aviso del navegador
+      if (content.hook.length > 10 || content.body.length > 10) {
+        e.preventDefault()
+        e.returnValue = "" // Requerido por Chrome/Brave
+      }
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload)
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload)
+  }, [content.hook, content.body])
+  // ---------------------------------------
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setIsReadingMode(false)
@@ -95,6 +109,18 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
       }
     }
   }, [formData])
+
+  // --- NUEVO: FUNCIÓN PARA SALIR CON SEGURIDAD (Botón atrás) ---
+  const handleSafeBack = () => {
+    if (content.hook.length > 10 || content.body.length > 10) {
+      const confirmExit = window.confirm(
+        "¿Seguro que quieres salir? Se perderán los cambios que no hayas guardado."
+      )
+      if (confirmExit) onBack()
+    } else {
+      onBack()
+    }
+  }
 
   const generateAIContent = async () => {
     setIsGenerating(true)
@@ -288,7 +314,7 @@ export function ScriptEditor({ formData, onBack, onSaveSuccess }: ScriptEditorPr
     <div className="h-full flex flex-col relative">
       <header className="flex items-center justify-between p-3 md:p-4 border-b bg-card/50">
         <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
-          <Button variant="ghost" size="icon" onClick={onBack} className="shrink-0">
+          <Button variant="ghost" size="icon" onClick={handleSafeBack} className="shrink-0">
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="min-w-0 overflow-hidden">
