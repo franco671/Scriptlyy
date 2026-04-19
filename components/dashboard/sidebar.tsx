@@ -146,7 +146,7 @@ export function DashboardSidebar({
           <Button
             onClick={() => {
               setIsMobileOpen(false);
-              router.push("/#pricing"); // Te lleva a la sección de planes
+              router.push("/pricing"); // Te lleva a la sección de planes
             }}
             className="w-full gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-md animate-in fade-in zoom-in duration-300"
           >
