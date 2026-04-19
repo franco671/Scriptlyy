@@ -16,37 +16,26 @@ export async function GET() {
       .eq("user_id", user.id)
       .order("id", { ascending: false })
 
-    if (error) {
-      throw error
-    }
+    if (error) throw error
 
-    // Get credits and premium status from profiles
     const { data: profile } = await supabase
       .from("profiles")
       .select("es_premium, creditos")
       .eq("id", user.id)
       .single()
 
-    const esPremium = profile?.es_premium ?? false
-    const creditos = profile?.creditos ?? 0
-    const count = guiones?.length ?? 0
-    const canCreate = creditos > 0
-
     return NextResponse.json({
       guiones,
       meta: {
-        count,
-        creditos,
-        es_premium: esPremium,
-        can_create: canCreate
+        count: guiones?.length ?? 0,
+        creditos: profile?.creditos ?? 0,
+        es_premium: profile?.es_premium ?? false,
+        can_create: (profile?.creditos ?? 0) > 0
       }
     })
   } catch (error) {
     console.error("Error fetching guiones:", error)
-    return NextResponse.json(
-      { error: "Error al obtener los guiones" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Error al obtener los guiones" }, { status: 500 })
   }
 }
 
@@ -59,24 +48,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 })
     }
 
-    // Check credits
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("creditos")
-      .eq("id", user.id)
-      .single()
-
-    const creditos = profile?.creditos ?? 0
-
-    if (creditos <= 0) {
-      return NextResponse.json(
-        { error: "No tienes créditos disponibles. Compra más créditos para continuar." },
-        { status: 403 }
-      )
-    }
-
     const { titulo, nicho, hook, desarrollo, cta, segundos, visual_suggestion } = await request.json()
 
+    // SIMPLEMENTE INSERTAMOS EL GUION
+    // No verificamos créditos aquí porque el guardado debe ser libre
     const { data, error } = await supabase
       .from("guiones")
       .insert({
@@ -92,29 +67,14 @@ export async function POST(request: Request) {
       .select()
       .single()
 
-    if (error) {
-      throw error
-    }
+    if (error) throw error
 
-    // Deduct one credit
-    const { error: creditError } = await supabase
-      .from("profiles")
-      .update({ creditos: creditos - 1 })
-      .eq("id", user.id)
+    // ELIMINAMOS LA SECCIÓN DE "DEDUCT ONE CREDIT"
+    // Ahora guardar es una operación de base de datos estándar y gratuita.
 
-    if (creditError) {
-      console.error("Error deducting credit:", creditError)
-    }
-
-    return NextResponse.json({
-      ...data,
-      creditos_restantes: creditos - 1
-    })
+    return NextResponse.json(data)
   } catch (error) {
     console.error("Error saving guion:", error)
-    return NextResponse.json(
-      { error: "Error al guardar el guion" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Error al guardar el guion" }, { status: 500 })
   }
 }
